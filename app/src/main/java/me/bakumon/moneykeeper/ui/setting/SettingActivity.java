@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
+ 
 package me.bakumon.moneykeeper.ui.setting;
-
+ 
 import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -26,10 +26,10 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
-
+ 
 import java.util.ArrayList;
 import java.util.List;
-
+ 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import me.bakumon.moneykeeper.ConfigManager;
@@ -37,14 +37,13 @@ import me.bakumon.moneykeeper.R;
 import me.bakumon.moneykeeper.Router;
 import me.bakumon.moneykeeper.base.BaseActivity;
 import me.bakumon.moneykeeper.databinding.ActivitySettingBinding;
-import me.bakumon.moneykeeper.utill.AlipayZeroSdk;
 import me.bakumon.moneykeeper.utill.CustomTabsUtil;
 import me.bakumon.moneykeeper.utill.ToastUtils;
 import me.drakeet.floo.Floo;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 import pub.devrel.easypermissions.PermissionRequest;
-
+ 
 /**
  * 设置
  *
@@ -55,80 +54,72 @@ public class SettingActivity extends BaseActivity implements EasyPermissions.Per
     private ActivitySettingBinding mBinding;
     private SettingViewModel mViewModel;
     private SettingAdapter mAdapter;
-
+ 
     @Override
     protected int getLayoutId() {
         return R.layout.activity_setting;
     }
-
+ 
     @Override
     protected void onInit(@Nullable Bundle savedInstanceState) {
         mBinding = getDataBinding();
         mViewModel = ViewModelProviders.of(this).get(SettingViewModel.class);
-
+ 
         initView();
     }
-
+ 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
-
+ 
     private void initView() {
         mBinding.titleBar.ibtClose.setOnClickListener(v -> finish());
         mBinding.titleBar.setTitle(getString(R.string.text_title_setting));
-
+ 
         mBinding.rvSetting.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new SettingAdapter(null);
-
+ 
         List<SettingSectionEntity> list = new ArrayList<>();
-
+ 
         list.add(new SettingSectionEntity(getString(R.string.text_setting_money)));
         list.add(new SettingSectionEntity(new SettingSectionEntity.Item(getString(R.string.text_setting_type_manage), null)));
-
+ 
         list.add(new SettingSectionEntity(getString(R.string.text_setting_backup)));
         list.add(new SettingSectionEntity(new SettingSectionEntity.Item(getString(R.string.text_go_backup), getString(R.string.text_setting_go_backup_content))));
         list.add(new SettingSectionEntity(new SettingSectionEntity.Item(getString(R.string.text_setting_restore), getString(R.string.text_setting_restore_content))));
         list.add(new SettingSectionEntity(new SettingSectionEntity.Item(getString(R.string.text_setting_auto_backup), getString(R.string.text_setting_auto_backup_content), ConfigManager.isAutoBackup())));
-
+ 
         list.add(new SettingSectionEntity(getString(R.string.text_setting_about_and_help)));
         list.add(new SettingSectionEntity(new SettingSectionEntity.Item(getString(R.string.text_about), getString(R.string.text_about_content))));
         list.add(new SettingSectionEntity(new SettingSectionEntity.Item(getString(R.string.text_setting_score), getString(R.string.text_setting_good_score) + "\uD83D\uDE18")));
-        list.add(new SettingSectionEntity(new SettingSectionEntity.Item(getString(R.string.text_setting_donate), "")));
+        // DONATE entry removed
         list.add(new SettingSectionEntity(new SettingSectionEntity.Item(getString(R.string.text_setting_lisence))));
         list.add(new SettingSectionEntity(new SettingSectionEntity.Item(getString(R.string.text_setting_help))));
-
+ 
         mAdapter.setNewData(list);
-
+ 
         mAdapter.setOnItemClickListener((adapter1, view, position) -> {
-            switch (position) {
-                case 1:
-                    goTypeManage();
-                    break;
-                case 3:
-                    showBackupDialog();
-                    break;
-                case 4:
-                    showRestoreDialog();
-                    break;
-                case 7:
-                    goAbout();
-                    break;
-                case 8:
-                    market();
-                    break;
-                case 9:
-                    alipay();
-                    break;
-                case 10:
-                    goOpenSource();
-                    break;
-                case 11:
-                    CustomTabsUtil.openWeb(this, "https://github.com/Bakumon/MoneyKeeper/blob/master/Help.md");
-                    break;
-                default:
-                    break;
+            SettingSectionEntity.Item item = mAdapter.getData().get(position).t;
+            if (item == null || item.title == null) {
+                return;
+            }
+            String title = item.title;
+            if (title.equals(getString(R.string.text_setting_type_manage))) {
+                goTypeManage();
+            } else if (title.equals(getString(R.string.text_go_backup))) {
+                showBackupDialog();
+            } else if (title.equals(getString(R.string.text_setting_restore))) {
+                showRestoreDialog();
+            } else if (title.equals(getString(R.string.text_about))) {
+                goAbout();
+            } else if (title.equals(getString(R.string.text_setting_score))) {
+                market();
+            } else if (title.equals(getString(R.string.text_setting_lisence))) {
+                goOpenSource();
+            } else if (title.equals(getString(R.string.text_setting_help))) {
+                CustomTabsUtil.openWeb(this, "https://github.com/Bakumon/MoneyKeeper/blob/master/Help.md");
             }
         });
         // Switch
@@ -143,7 +134,7 @@ public class SettingActivity extends BaseActivity implements EasyPermissions.Per
         });
         mBinding.rvSetting.setAdapter(mAdapter);
     }
-
+ 
     private void switchAutoBackup(int position) {
         boolean oldIsConfigOpen = mAdapter.getData().get(position).t.isConfigOpen;
         if (oldIsConfigOpen) {
@@ -169,7 +160,7 @@ public class SettingActivity extends BaseActivity implements EasyPermissions.Per
                             .build());
         }
     }
-
+ 
     @Override
     public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
         switch (requestCode) {
@@ -187,7 +178,7 @@ public class SettingActivity extends BaseActivity implements EasyPermissions.Per
                 break;
         }
     }
-
+ 
     @Override
     public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
         if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
@@ -200,7 +191,7 @@ public class SettingActivity extends BaseActivity implements EasyPermissions.Per
                     .show();
         }
     }
-
+ 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -208,13 +199,13 @@ public class SettingActivity extends BaseActivity implements EasyPermissions.Per
             initView();
         }
     }
-
+ 
     private void setAutoBackup(int position, boolean isBackup) {
         ConfigManager.setIsAutoBackup(isBackup);
         mAdapter.getData().get(position).t.isConfigOpen = isBackup;
         mAdapter.notifyDataSetChanged();
     }
-
+ 
     private void showBackupDialog() {
         if (EasyPermissions.hasPermissions(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)) {
             backupDB();
@@ -227,7 +218,7 @@ public class SettingActivity extends BaseActivity implements EasyPermissions.Per
                         .setNegativeButtonText(R.string.text_button_cancel)
                         .build());
     }
-
+ 
     private void backupDB() {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.text_backup)
@@ -246,7 +237,7 @@ public class SettingActivity extends BaseActivity implements EasyPermissions.Per
                 .create()
                 .show();
     }
-
+ 
     private void showRestoreDialog() {
         if (EasyPermissions.hasPermissions(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)) {
             restore();
@@ -259,7 +250,7 @@ public class SettingActivity extends BaseActivity implements EasyPermissions.Per
                         .setNegativeButtonText(R.string.text_button_cancel)
                         .build());
     }
-
+ 
     private void restore() {
         mDisposable.add(mViewModel.getBackupFiles()
                 .subscribeOn(Schedulers.io())
@@ -274,7 +265,7 @@ public class SettingActivity extends BaseActivity implements EasyPermissions.Per
                             Log.e(TAG, "备份文件列表获取失败", throwable);
                         }));
     }
-
+ 
     private void restoreDB(String restoreFile) {
         mDisposable.add(mViewModel.restoreDB(restoreFile)
                 .subscribeOn(Schedulers.io())
@@ -288,22 +279,22 @@ public class SettingActivity extends BaseActivity implements EasyPermissions.Per
                             Log.e(TAG, "恢复备份失败", throwable);
                         }));
     }
-
+ 
     private void goTypeManage() {
         Floo.navigation(this, Router.Url.URL_TYPE_MANAGE)
                 .start();
     }
-
+ 
     private void goAbout() {
         Floo.navigation(this, Router.Url.URL_ABOUT)
                 .start();
     }
-
+ 
     private void goOpenSource() {
         Floo.navigation(this, Router.Url.URL_OPEN_SOURCE)
                 .start();
     }
-
+ 
     private void market() {
         try {
             Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -312,17 +303,6 @@ public class SettingActivity extends BaseActivity implements EasyPermissions.Per
         } catch (Exception e) {
             ToastUtils.show(R.string.toast_not_install_market);
             e.printStackTrace();
-        }
-    }
-
-    private void alipay() {
-        // https://fama.alipay.com/qrcode/qrcodelist.htm?qrCodeType=P  二维码地址
-        // http://cli.im/deqr/ 解析二维码
-        // aex01251c8foqaprudcp503
-        if (AlipayZeroSdk.hasInstalledAlipayClient(this)) {
-            AlipayZeroSdk.startAlipayClient(this, "aex01251c8foqaprudcp503");
-        } else {
-            ToastUtils.show(R.string.toast_not_install_alipay);
         }
     }
 }
